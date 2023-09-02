@@ -49,6 +49,8 @@ class WIFIMANAGER {
 
     bool softApRunning = false;         // Due to lack of functions, we have to remember if the AP is already running...
     bool createFallbackAP = true;       // Create an AP for configuration if no other connection is available
+    String softAPPassword = "";         // Password for SoftAP for additional protection, can be empty for open
+    String softApName = "";             // Name of the SoftAP
 
     uint64_t lastWifiCheckMillis = 0;   // Time of last Wifi health check
     uint32_t intervalWifiCheckMillis = 15000; // Interval of the Wifi health checks
@@ -69,7 +71,7 @@ class WIFIMANAGER {
     virtual ~WIFIMANAGER();
 
     // If no known Wifi can't be found, create an AP but retry regulary
-    void fallbackToSoftAp(bool state = true);
+    void fallbackToSoftAp(bool state = true, String valSoftApName = "", String valSoftAPPassword = "");
 
     // Get the current fallback state
     bool getFallbackState();
