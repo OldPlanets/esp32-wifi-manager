@@ -113,9 +113,13 @@ WIFIMANAGER::~WIFIMANAGER() {
 /**
  * @brief If no WIFI is available, fallback to create an AP on the ESP32
  * @param state boolean true (create AP) or false (don't create an AP)
+ * @param valSoftApName String "" AP name or default name if empty
+ * @param valSoftAPPassword String "" AP password or no password if empty or too short
  */
-void WIFIMANAGER::fallbackToSoftAp(bool state) {
+void WIFIMANAGER::fallbackToSoftAp(bool state, String valSoftApName, String valSoftAPPassword) {
   createFallbackAP = state;
+  softAPPassword = valSoftAPPassword.length() >= 8 ? valSoftAPPassword : "";
+  softApName = valSoftApName;
 }
 
 /**
@@ -445,11 +449,21 @@ bool WIFIMANAGER::runSoftAP(String apName) {
   if (softApRunning) return true;
   startApTimeMillis = millis();
 
-  if (apName == "") apName = "ESP_" + String((uint32_t)ESP.getEfuseMac());
+  if (apName == "")
+  {
+    if (!softApName.isEmpty())
+    {
+      apName = softApName;
+    }
+    else
+    {
+      apName = "ESP_" + String((uint32_t)ESP.getEfuseMac());
+    }
+  }
   Serial.printf("[WIFI] Starting configuration portal on AP SSID %s\n", apName.c_str());
-
+  if (!softAPPassword.isEmpty()) Serial.printf("Using SoftAP Password: %s\n", softAPPassword.c_str());
   WiFi.mode(WIFI_AP);
-  bool state = WiFi.softAP(apName.c_str());
+  bool state = WiFi.softAP(apName.c_str(), softAPPassword.isEmpty() ? NULL : softAPPassword.c_str());
   if (state) {
     IPAddress IP = WiFi.softAPIP();
     Serial.print(F("[WIFI] AP created. My IP is: "));
